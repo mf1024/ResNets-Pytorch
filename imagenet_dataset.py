@@ -9,9 +9,16 @@ from PIL import Image
 IMG_SIZE = (256,256)
 
 class ImageNetDataset(Dataset):
-    def __init__(self, data_path, is_train, train_split = 0.9, random_seed = 42, target_transform = None):
+    def __init__(self, data_path, is_train, train_split = 0.9, random_seed = 42, target_transform = None, num_classes = None):
         super(ImageNetDataset, self).__init__()
         self.data_path = data_path
+
+        self.is_classes_limited = False
+
+        if num_classes != None:
+            self.is_classes_limited = True
+            self.num_classes = num_classes
+
 
         self.classes = []
         class_idx = 0
@@ -24,6 +31,13 @@ class ImageNetDataset(Dataset):
                    class_name = class_name,
                ))
             class_idx += 1
+
+            if self.is_classes_limited:
+                if class_idx == self.num_classes:
+                    break
+
+        if not self.is_classes_limited:
+            self.num_classes = len(self.classes)
 
         self.image_list = []
         for cls in self.classes:
@@ -47,6 +61,9 @@ class ImageNetDataset(Dataset):
         else:
             self.img_idxes = self.img_idxes[last_train_sample:]
 
+    def get_class_num(self):
+        return self.num_classes
+
     def __len__(self):
         return len(self.img_idxes)
 
@@ -56,6 +73,13 @@ class ImageNetDataset(Dataset):
         img_info = self.image_list[img_idx]
 
         img = Image.open(img_info['image_path'])
+
+        if img.mode == 'L':
+            tr = transforms.Grayscale(num_output_channels=3)
+            img = tr(img)
+
+        tr = transforms.ToTensor()
+        img1 = tr(img)
 
         width, height = img.size
         if min(width, height)>350:

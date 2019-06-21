@@ -1,3 +1,6 @@
+
+# Implementation based on publication https://arxiv.org/abs/1512.03385
+
 from torch import nn
 import torchvision
 from torchvision import transforms, utils
@@ -9,12 +12,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 import time
+import random
 
 from imagenet_dataset import ImageNetDataset
 
-# Implementation based on publication https://arxiv.org/abs/1512.03385
 
-BATCH_SIZE = 8
 
 class ResNetBlock(nn.Module):
 
@@ -81,12 +83,13 @@ class ResNetBottleneckBlock(nn.Module):
     def __init__(self, in_channels_block, is_downsampling_block = False):
         super(ResNetBottleneckBlock, self).__init__()
 
+        self.is_downsampling_block = is_downsampling_block
         self.in_channels_block = in_channels_block
-        self.bottleneck_channels = in_channels_block / 4
+        self.bottleneck_channels = in_channels_block // 4
         self.out_channels_block = self.bottleneck_channels * 4
         self.layer_3_stride = 1
 
-        if is_downsampling_block:
+        if self.is_downsampling_block:
             self.out_channels_block *= 2
             self.layer_3_stride = 2
 
@@ -120,7 +123,7 @@ class ResNetBottleneckBlock(nn.Module):
             out_channels = self.out_channels_block,
             kernel_size = 1,
             stride = self.layer_3_stride,
-            padding = 1
+            padding = 0
         )
         self.batch_norm_3 = nn.BatchNorm2d(self.in_channels_block)
 
@@ -143,9 +146,9 @@ class ResNetBottleneckBlock(nn.Module):
         x = self.conv_layer_3(x)
         x = x + identity
 
-        x = nn.ReLU(x)
+        x = nn.functional.relu(x)
 
-        return
+        return x
 
 
 class ResNet(nn.Module):
@@ -252,6 +255,8 @@ class ResNet(nn.Module):
         self.avg_pool = nn.AdaptiveAvgPool2d(1)
         self.fully_connected = nn.Linear(current_channels, self.class_num)
 
+        self.softmax = nn.Softmax(dim=1)
+
     def forward(self, x):
 
         print(f"x_shape{x.shape}")
@@ -268,7 +273,7 @@ class ResNet(nn.Module):
         x = torch.squeeze(x, dim = 2)
 
         x = self.fully_connected(x)
-        x = nn.Softmax(x)
+        x = self.softmax(x)
 
         return x
 
@@ -277,30 +282,70 @@ class ResNet(nn.Module):
 #TODO: Testing
 #TODO: SGD
 
-model = ResNet(class_num = 10, is_bottleneck_resnet = True)
+model_resnet50 = ResNet(class_num = 10, is_bottleneck_resnet = True)
 
 data_path = "/Users/martinsf/data/images_1/imagenet_images/"
 random_seed = int(time.time())
-dataset_train = ImageNetDataset(data_path,is_train = True, random_seed=random_seed)
+dataset_train = ImageNetDataset(data_path,is_train = True, random_seed=random_seed, num_classes = 10)
 
-BATCH_SIZE = 64
+# data_loader_train = DataLoader(dataset_train, BATCH_SIZE, shuffle = True)
+#
+# import matplotlib.pyplot as plt
+#
+# for x in data_loader_train:
+#
+#     print("blaa")
+#
+#     print(x["image"].shape)
+#     y_prim = model_resnet50.forward(x["image"])
+#
+#     print(torch.sum(y_prim, dim=1))
+#     print(f"y_prim {y_prim}")
+#
+#     for i in range(BATCH_SIZE):
+#         img = x['image'][i].numpy()
+#         plt.title(x['class_name'][i])
+#         plt.imshow(np.transpose(img,(1,2,0)))
+#         plt.show()
+#
+#     break
+
+
+#Training
+
+
+
+NUM_CLASSES = dataset_train.get_class_num()
+print(f'num_classes {NUM_CLASSES}')
+NUM_EPOCHS = 5
+BATCH_SIZE = 16
+LEARNING_RATE = 1e-4
+
+model_resnet50 = model_resnet50.to("cpu")
+optimizer = torch.optim.Adam(params = model_resnet50.parameters(), lr = LEARNING_RATE)
+
 data_loader_train = DataLoader(dataset_train, BATCH_SIZE, shuffle = True)
 
-import matplotlib.pyplot as plt
 
-for x in data_loader_train:
+for epoch in range(NUM_EPOCHS):
 
-    print("blaa")
+    print(f"Starting epoch {epoch}")
 
-    print(x["image"].shape)
-    model.forward(x["image"])
+    for batch in data_loader_train:
+        x = batch['image']
+        y = batch['cls']
 
-    print(x['image'].shape)
-    for i in range(BATCH_SIZE):
-        img = x['image'][i].numpy()
-        plt.title(x['class_name'][i])
-        plt.imshow(np.transpose(img,(1,2,0)))
-        plt.show()
+        y_one_hot = torch.zeros(BATCH_SIZE, NUM_CLASSES)
+        y_one_hot = y_one_hot.scatter_(1, y.unsqueeze(dim=1), 1)
 
-    break
+        labels = batch['class_name']
+
+        y_prim = model_resnet50.forward(x)
+
+        loss = torch.sum(-y_one_hot * torch.log(y_prim))
+        print(f"loss is {loss}")
+
+        loss.backward()
+        optimizer.step()
+        optimizer.zero_grad()
 

@@ -259,8 +259,6 @@ class ResNet(nn.Module):
 
     def forward(self, x):
 
-        print(f"x_shape{x.shape}")
-
         x = self.conv1(x)
         x = self.conv2(x)
         x = self.conv3(x)
@@ -316,12 +314,15 @@ dataset_train = ImageNetDataset(data_path,is_train = True, random_seed=random_se
 
 
 NUM_CLASSES = dataset_train.get_class_num()
-print(f'num_classes {NUM_CLASSES}')
-NUM_EPOCHS = 5
-BATCH_SIZE = 16
-LEARNING_RATE = 1e-4
+print(dataset_train.get_class_names())
 
-model_resnet50 = model_resnet50.to("cpu")
+print(f'num_classes {NUM_CLASSES}')
+NUM_EPOCHS = 100
+BATCH_SIZE = 64
+LEARNING_RATE = 1e-4
+DEVICE = 'cuda'
+
+model_resnet50 = model_resnet50.to(DEVICE)
 optimizer = torch.optim.Adam(params = model_resnet50.parameters(), lr = LEARNING_RATE)
 
 data_loader_train = DataLoader(dataset_train, BATCH_SIZE, shuffle = True)
@@ -332,10 +333,10 @@ for epoch in range(NUM_EPOCHS):
     print(f"Starting epoch {epoch}")
 
     for batch in data_loader_train:
-        x = batch['image']
-        y = batch['cls']
+        x = batch['image'].to(DEVICE)
+        y = batch['cls'].to(DEVICE)
 
-        y_one_hot = torch.zeros(BATCH_SIZE, NUM_CLASSES)
+        y_one_hot = torch.zeros(x.shape[0], NUM_CLASSES).to(DEVICE)
         y_one_hot = y_one_hot.scatter_(1, y.unsqueeze(dim=1), 1)
 
         labels = batch['class_name']

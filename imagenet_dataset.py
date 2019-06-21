@@ -19,7 +19,6 @@ class ImageNetDataset(Dataset):
             self.is_classes_limited = True
             self.num_classes = num_classes
 
-
         self.classes = []
         class_idx = 0
         for class_name in os.listdir(data_path):
@@ -64,6 +63,9 @@ class ImageNetDataset(Dataset):
     def get_class_num(self):
         return self.num_classes
 
+    def get_class_names(self):
+        return [cls['class_name'] for cls in self.classes]
+
     def __len__(self):
         return len(self.img_idxes)
 
@@ -96,6 +98,9 @@ class ImageNetDataset(Dataset):
 
         tr = transforms.ToTensor()
         img = tr(img)
+
+        if (img.shape[0] != 3):
+            img = img[0:3]
 
         return dict(image = img, cls = img_info['cls']['class_idx'], class_name = img_info['cls']['class_name'])
 

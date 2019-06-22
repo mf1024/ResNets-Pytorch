@@ -60,11 +60,17 @@ class ImageNetDataset(Dataset):
         else:
             self.img_idxes = self.img_idxes[last_train_sample:]
 
-    def get_class_num(self):
+    def get_number_of_classes(self):
         return self.num_classes
+
+    def get_number_of_samples(self):
+        return self.__len__()
 
     def get_class_names(self):
         return [cls['class_name'] for cls in self.classes]
+
+    def get_class_name(self, class_idx):
+        return self.classes[class_idx]['class_name']
 
     def __len__(self):
         return len(self.img_idxes)
@@ -104,6 +110,16 @@ class ImageNetDataset(Dataset):
 
         return dict(image = img, cls = img_info['cls']['class_idx'], class_name = img_info['cls']['class_name'])
 
+
+
+def get_imagenet_datasets(data_path, num_classes = None):
+
+    random_seed = int(time.time())
+
+    dataset_train = ImageNetDataset(data_path,is_train = True, random_seed=random_seed, num_classes = num_classes)
+    dataset_test = ImageNetDataset(data_path, is_train = False, random_seed=random_seed, num_classes = num_classes)
+
+    return dataset_train, dataset_test
 
 # data_path = "/Users/martinsf/data/images_1/imagenet_images/"
 # random_seed = int(time.time())

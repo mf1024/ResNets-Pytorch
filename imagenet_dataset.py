@@ -90,16 +90,16 @@ class ImageNetDataset(Dataset):
         img1 = tr(img)
 
         width, height = img.size
-        if min(width, height)>350:
-            tr = transforms.Resize((350))
+        if min(width, height)>IMG_SIZE[0] * 1.5:
+            tr = transforms.Resize(int(IMG_SIZE[0] * 1.5))
             img = tr(img)
 
         width, height = img.size
-        if min(width, height)<256:
-            tr = transforms.Resize((256,256))
+        if min(width, height)<IMG_SIZE[0]:
+            tr = transforms.Resize(IMG_SIZE)
             img = tr(img)
 
-        tr = transforms.RandomCrop((256,256))
+        tr = transforms.RandomCrop(IMG_SIZE)
         img = tr(img)
 
         tr = transforms.ToTensor()
@@ -109,7 +109,6 @@ class ImageNetDataset(Dataset):
             img = img[0:3]
 
         return dict(image = img, cls = img_info['cls']['class_idx'], class_name = img_info['cls']['class_name'])
-
 
 
 def get_imagenet_datasets(data_path, num_classes = None):

@@ -16,8 +16,6 @@ import random
 
 from imagenet_dataset import get_imagenet_datasets
 
-
-
 class ResNetBlock(nn.Module):
 
     # We default to 2 weight layers per block as in paper
@@ -42,6 +40,8 @@ class ResNetBlock(nn.Module):
                 padding = 0
             )
 
+            self.projection_batch_norm = nn.BatchNorm2d(self.out_channels_block)
+
         self.conv_layer_1 = nn.Conv2d(
             in_channels = self.in_channels_block,
             out_channels = self.in_channels_block,
@@ -64,6 +64,7 @@ class ResNetBlock(nn.Module):
 
         if self.is_downsampling_block:
             identity = self.projection_shortcut(identity)
+            identity = self.projection_batch_norm(identity)
 
         x = self.conv_layer_1.forward(x)
         x = self.batch_norm_1(x)
@@ -101,6 +102,8 @@ class ResNetBottleneckBlock(nn.Module):
                 padding = 0
             )
 
+            self.projection_batch_norm = nn.BatchNorm2d(self.out_channels_block)
+
         self.conv_layer_1 = nn.Conv2d(
             in_channels=self.in_channels_block,
             out_channels=self.bottleneck_channels,
@@ -134,6 +137,7 @@ class ResNetBottleneckBlock(nn.Module):
 
         if self.is_downsampling_block:
             identity = self.projection_shortcut(identity)
+            identity = self.projection_batch_norm(identity)
 
         x = self.conv_layer_1(x)
         x = self.batch_norm_1(x)
@@ -299,6 +303,7 @@ def plot_results(image_batch, predictions, truth, image_name = "plot"):
         axes[row, col].set_title(f"Predicted class {predicted_class} \n but actually {actual_class}")
 
     plt.savefig(f"{image_name}.jpg")
+    plt.close()
 
 NUM_CLASSES = None
 NUM_CLASSES = 10
@@ -400,12 +405,10 @@ for epoch in range(NUM_EPOCHS):
                              y.detach().to('cpu').numpy(),
                              image_name=f"epoch_{epoch}")
 
-
-
         epoch_accuracy = float(epoch_test_true_positives) / float(NUM_TEST_SAMPLES)
         print(f"true_positives {epoch_test_true_positives} from {NUM_TEST_SAMPLES} samples")
         print(f"Epoch {epoch} test mean loss is {np.mean(epoch_test_losses)}")
         print(f"Epoch {epoch} test accuracy is {epoch_accuracy * 100}")
 
-    #TODO: SGD
+    #TODO: Try SGD
 

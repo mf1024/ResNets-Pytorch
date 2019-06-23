@@ -11,6 +11,8 @@ from torch.utils.data import Dataset, DataLoader
 import numpy as np
 import matplotlib.pyplot as plt
 
+import os
+
 import time
 import random
 
@@ -323,16 +325,35 @@ print(f'num_classes {NUM_CLASSES}')
 NUM_EPOCHS = 10000
 BATCH_SIZE = 64
 LEARNING_RATE = 1e-4
-DEVICE = 'cuda'
-#DEVICE = 'cpu'
+#DEVICE = 'cuda'
+DEVICE = 'cpu'
 
 model_resnet50 = ResNet(class_num = NUM_CLASSES, is_bottleneck_resnet = True).to(DEVICE)
 optimizer = torch.optim.Adam(params = model_resnet50.parameters(), lr = LEARNING_RATE)
+
+def layers_debug(optim):
+    layer_count = 0
+    for var_name in optim.state_dict():
+        if len(optim.state_dict()[var_name].shape)>1:
+            layer_count += 1
+            print(f"{var_name}\t\t{optim.state_dict()[var_name].shape}")
+    print(layer_count)
+
+
+layers_debug(model_resnet50)
 
 def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
 print(f"number of resnet50 params {count_parameters(model_resnet50)}")
+
+trained_models_path = "./trained_models"
+last_model_path = os.path.join(trained_models_path, "last.pt")
+best_model_path = os.path.join(trained_models_path, "best.pt")
+
+print(last_model_path)
+
+best_test_acc = 0
 
 data_loader_train = DataLoader(dataset_train, BATCH_SIZE, shuffle = True)
 data_loader_test = DataLoader(dataset_test, BATCH_SIZE, shuffle = True)
@@ -405,10 +426,16 @@ for epoch in range(NUM_EPOCHS):
                              y.detach().to('cpu').numpy(),
                              image_name=f"epoch_{epoch}")
 
-        epoch_accuracy = float(epoch_test_true_positives) / float(NUM_TEST_SAMPLES)
+
+        epoch_test_accuracy = float(epoch_test_true_positives) / float(NUM_TEST_SAMPLES)
         print(f"true_positives {epoch_test_true_positives} from {NUM_TEST_SAMPLES} samples")
         print(f"Epoch {epoch} test mean loss is {np.mean(epoch_test_losses)}")
-        print(f"Epoch {epoch} test accuracy is {epoch_accuracy * 100}")
+        print(f"Epoch {epoch} test accuracy is {epoch_test_accuracy * 100}")
+
+        torch.save(model_resnet50, last_model_path)
+        if epoch_test_accuracy > best_test_accuracy:
+            best_test_accuracy = epoch_test_accuracy
+            torch.save(model_resnet50, best_model_path)
 
     #TODO: Try SGD
 

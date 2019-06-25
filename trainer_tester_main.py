@@ -82,6 +82,10 @@ def count_parameters(model):
 print(f"number of resnet50 params {count_parameters(model_resnet50)}")
 
 trained_models_path = "./trained_models"
+
+if not os.path.exists(trained_models_path):
+    os.mkdir(trained_models_path)
+
 last_model_path = os.path.join(trained_models_path, "last.pt")
 best_model_path = os.path.join(trained_models_path, "best.pt")
 best_test_acc = 0

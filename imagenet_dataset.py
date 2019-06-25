@@ -6,7 +6,7 @@ import numpy as np
 import time
 from PIL import Image
 
-IMG_SIZE = (256,256)
+IMG_SIZE = (224,224)
 
 class ImageNetDataset(Dataset):
     def __init__(self, data_path, is_train, train_split = 0.9, random_seed = 42, target_transform = None, num_classes = None):
@@ -60,18 +60,6 @@ class ImageNetDataset(Dataset):
         else:
             self.img_idxes = self.img_idxes[last_train_sample:]
 
-    def get_number_of_classes(self):
-        return self.num_classes
-
-    def get_number_of_samples(self):
-        return self.__len__()
-
-    def get_class_names(self):
-        return [cls['class_name'] for cls in self.classes]
-
-    def get_class_name(self, class_idx):
-        return self.classes[class_idx]['class_name']
-
     def __len__(self):
         return len(self.img_idxes)
 
@@ -110,6 +98,18 @@ class ImageNetDataset(Dataset):
 
         return dict(image = img, cls = img_info['cls']['class_idx'], class_name = img_info['cls']['class_name'])
 
+    def get_number_of_classes(self):
+        return self.num_classes
+
+    def get_number_of_samples(self):
+        return self.__len__()
+
+    def get_class_names(self):
+        return [cls['class_name'] for cls in self.classes]
+
+    def get_class_name(self, class_idx):
+        return self.classes[class_idx]['class_name']
+
 
 def get_imagenet_datasets(data_path, num_classes = None):
 
@@ -120,23 +120,41 @@ def get_imagenet_datasets(data_path, num_classes = None):
 
     return dataset_train, dataset_test
 
-# data_path = "/Users/martinsf/data/images_1/imagenet_images/"
-# random_seed = int(time.time())
-# dataset_train = ImageNetDataset(data_path,is_train = True, random_seed=random_seed)
 #
-# BATCH_SIZE = 64
+# data_path = "/Users/martinsf/data/images_1/imagenet_images/"
+# dataset_train, dataset_test = get_imagenet_datasets(data_path)
+#
+# print(f"Number of train samplest {dataset_train.__len__()}")
+# print(f"Number of samples in test split {dataset_test.__len__()}")
+#
+# BATCH_SIZE = 200
+#
 # data_loader_train = DataLoader(dataset_train, BATCH_SIZE, shuffle = True)
+# data_loader_test = DataLoader(dataset_test, BATCH_SIZE, shuffle = True)
+#
 #
 # import matplotlib.pyplot as plt
 #
-# for x in data_loader_train:
-#     print(x['image'].shape)
+# fig, axes = plt.subplots(BATCH_SIZE//20,20, figsize=(6,10))
+#
+# for batch in data_loader_train:
+#
+#     print(f"Shape of batch['image'] {batch['image'].shape}")
+#     print(f"Shape of batch['cls'] {batch['cls'].shape}")
+#
 #     for i in range(BATCH_SIZE):
-#         img = x['image'][i].numpy()
-#         plt.title(x['class_name'][i])
-#         plt.imshow(np.transpose(img,(1,2,0)))
-#         plt.show()
+#
+#         col = i % 20
+#         row = i // 20
+#
+#         img = batch['image'][i].numpy()
+#
+#         axes[row,col].set_axis_off()
+#         #axes[row,col].set_title(batch['class_name'][i])
+#         axes[row,col].imshow(np.transpose(img,(1,2,0)))
+#
+#     plt.show()
 #
 #     break
-#
+
 

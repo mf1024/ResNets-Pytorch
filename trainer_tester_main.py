@@ -88,7 +88,7 @@ if not os.path.exists(trained_models_path):
 
 last_model_path = os.path.join(trained_models_path, "last.pt")
 best_model_path = os.path.join(trained_models_path, "best.pt")
-best_test_acc = 0
+best_test_accuracy = 0
 
 data_loader_train = DataLoader(dataset_train, BATCH_SIZE, shuffle = True)
 data_loader_test = DataLoader(dataset_test, BATCH_SIZE, shuffle = True)

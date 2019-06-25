@@ -99,28 +99,18 @@ class ResNet101(nn.Module):
 
     def forward(self, x):
 
-        print(f"x shape before resnet is {x.shape}")
         x = self.conv1(x)
-        print(f"x shape after conv1 {x.shape}")
         x = self.conv2(x)
-        print(f"x shape after conv2 {x.shape}")
         x = self.conv3(x)
-        print(f"x shape after conv3 {x.shape}")
         x = self.conv4(x)
-        print(f"x shape after conv4 {x.shape}")
         x = self.conv5(x)
-        print(f"x shape after conv5 {x.shape}")
 
         x = self.avg_pool(x)
-
-        print(f"x shape after avg_pooling {x.shape}")
 
         x = torch.squeeze(x, dim = 3)
         x = torch.squeeze(x, dim = 2)
 
         x = self.fully_connected(x)
         x = self.softmax(x)
-
-        print(f"x shape after fully connected {x.shape}")
 
         return x

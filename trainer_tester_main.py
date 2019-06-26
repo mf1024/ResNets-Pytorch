@@ -60,8 +60,8 @@ LEARNING_RATE = 1e-4
 #DEVICE = 'cuda'
 DEVICE = 'cpu'
 
-model_resnet50 = ResNet50(class_num = NUM_CLASSES, is_bottleneck_resnet = True).to(DEVICE)
-optimizer = torch.optim.Adam(params = model_resnet50.parameters(), lr = LEARNING_RATE)
+model_resnet = ResNet50(class_num = NUM_CLASSES).to(DEVICE)
+optimizer = torch.optim.Adam(params = model_resnet.parameters(), lr = LEARNING_RATE)
 
 def layers_debug(optim):
     layer_count = 0
@@ -74,12 +74,12 @@ def layers_debug(optim):
     print(layer_count)
 
 
-layers_debug(model_resnet50)
+layers_debug(model_resnet)
 
 def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
-print(f"number of resnet50 params {count_parameters(model_resnet50)}")
+print(f"number of resnet params {count_parameters(model_resnet)}")
 
 trained_models_path = "./trained_models"
 
@@ -99,7 +99,7 @@ for epoch in range(NUM_EPOCHS):
 
     #TRAINING
 
-    model_resnet50 = model_resnet50.train()
+    model_resnet = model_resnet.train()
 
     epoch_train_losses = []
     epoch_train_true_positives = 0
@@ -115,7 +115,7 @@ for epoch in range(NUM_EPOCHS):
 
         labels = batch['class_name']
 
-        y_prim = model_resnet50.forward(x)
+        y_prim = model_resnet.forward(x)
 
         loss = torch.sum(-y_one_hot * torch.log(y_prim))
         epoch_train_losses.append(loss.detach().to('cpu').numpy())
@@ -135,7 +135,7 @@ for epoch in range(NUM_EPOCHS):
     #TEST
     with torch.no_grad():
 
-        model_resnet50 = model_resnet50.eval()
+        model_resnet = model_resnet.eval()
 
         epoch_test_losses = []
         epoch_test_true_positives = 0
@@ -152,7 +152,7 @@ for epoch in range(NUM_EPOCHS):
 
             labels = batch['class_name']
 
-            y_prim = model_resnet50.forward(x)
+            y_prim = model_resnet.forward(x)
             loss = torch.sum(-y_one_hot * torch.log(y_prim))
             epoch_test_losses.append(loss.detach().to('cpu').numpy())
 
@@ -170,7 +170,7 @@ for epoch in range(NUM_EPOCHS):
         print(f"Epoch {epoch} test mean loss is {np.mean(epoch_test_losses)}")
         print(f"Epoch {epoch} test accuracy is {epoch_test_accuracy * 100}")
 
-        torch.save(model_resnet50, last_model_path)
+        torch.save(model_resnet, last_model_path)
         if epoch_test_accuracy > best_test_accuracy:
             best_test_accuracy = epoch_test_accuracy
-            torch.save(model_resnet50, best_model_path)
+            torch.save(model_resnet, best_model_path)

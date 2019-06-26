@@ -10,7 +10,7 @@ from resnet_blocks import ResNetBottleneckBlock
 
 class ResNet50(nn.Module):
 
-    def __init__(self, class_num, is_bottleneck_resnet = False):
+    def __init__(self, class_num):
         super(ResNet50, self).__init__()
 
         self.class_num = class_num

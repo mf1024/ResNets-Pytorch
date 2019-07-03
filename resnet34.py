@@ -18,8 +18,10 @@ class ResNet34(nn.Module):
         self.conv5_blocks = 3
 
         self.conv1 = nn.Sequential()
+
         self.conv1.add_module(
-            'conv2_1',
+            'conv1_1',
+
             nn.Conv2d(
                 in_channels = 3,
                 out_channels = 64,
@@ -27,6 +29,14 @@ class ResNet34(nn.Module):
                 stride = 2,
                 padding = 3
             )
+        )
+        self.conv1.add_module(
+            'conv1_bn',
+            nn.BatchNorm2d(64)
+        )
+        self.conv1.add_module(
+            'conv1_relu',
+            nn.ReLU()
         )
 
         current_channels = 64

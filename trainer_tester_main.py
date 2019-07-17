@@ -10,6 +10,7 @@ import os
 from resnet18 import ResNet18
 from resnet34 import ResNet34
 from resnet50 import ResNet50
+from resnet50_v2 import ResNet50_v2
 from resnet101 import ResNet101
 from resnet152 import ResNet152
 
@@ -40,7 +41,7 @@ def plot_results(image_batch, predictions, truth, image_name = "plot"):
     plt.close()
 
 NUM_CLASSES = None
-NUM_CLASSES = 1000
+NUM_CLASSES = 10
 
 data_path = "/Users/martinsf/ai/deep_learning_projects/data/imagenet_images"
 dataset_train, dataset_test = get_imagenet_datasets(data_path, num_classes = NUM_CLASSES)
@@ -60,7 +61,10 @@ LEARNING_RATE = 1e-4
 #DEVICE = 'cuda'
 DEVICE = 'cpu'
 
-model_resnet = ResNet50(class_num = NUM_CLASSES).to(DEVICE)
+model_resnet = ResNet50_v2(class_num = NUM_CLASSES).to(DEVICE)
+
+params = list(model_resnet.parameters())
+print(len(params))
 optimizer = torch.optim.Adam(params = model_resnet.parameters(), lr = LEARNING_RATE)
 
 def layers_debug(optim):

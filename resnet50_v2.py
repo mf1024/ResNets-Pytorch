@@ -6,12 +6,12 @@ import torch
 import numpy as np
 import matplotlib.pyplot as plt
 
-from resnet_blocks import ResNetBottleneckBlock
+from resnet_blocks import ResNetBottleneckBlock_v2 as ResNetBottleneckBlock
 
-class ResNet50(nn.Module):
+class ResNet50_v2(nn.Module):
 
     def __init__(self, class_num):
-        super(ResNet50, self).__init__()
+        super(ResNet50_v2, self).__init__()
 
         self.class_num = class_num
 
@@ -112,20 +112,19 @@ class ResNet50(nn.Module):
 
     def forward(self, x):
 
-        x = self.conv1(x)
-        x = self.conv2(x)
-        x = self.conv3(x)
-        x = self.conv4(x)
-        x = self.conv5(x)
+        x = self.conv1.forward(x)
+        x = self.conv2.forward(x)
+        x = self.conv3.forward(x)
+        x = self.conv4.forward(x)
+        x = self.conv5.forward(x)
 
-        x = self.avg_pool(x)
+        x = self.avg_pool.forward(x)
 
         x = torch.squeeze(x, dim = 3)
         x = torch.squeeze(x, dim = 2)
 
-        x = self.fully_connected(x)
-        x = self.softmax(x)
+        x = self.fully_connected.forward(x)
+        x = self.softmax.forward(x)
 
         return x
-
 

@@ -308,7 +308,7 @@ class ResNetBottleneckBlock_v2_renorm(nn.Module):
             )
 
 
-        self.batch_norm_1 = BatchNormalization2D(self.in_channels_block)
+        self.batch_norm_1 = BatchRenormalization2D(self.in_channels_block)
         self.relu_1 = nn.ReLU()
         self.conv_layer_1 = nn.Conv2d(
             in_channels=self.in_channels_block,
@@ -317,7 +317,7 @@ class ResNetBottleneckBlock_v2_renorm(nn.Module):
             stride=self.layer_1_stride,
             padding=0)
 
-        self.batch_norm_2 = BatchNormalization2D(self.bottleneck_channels)
+        self.batch_norm_2 = BatchRenormalization2D(self.bottleneck_channels)
         self.relu_2 = nn.ReLU()
         self.conv_layer_2 = nn.Conv2d(
             in_channels = self.bottleneck_channels,
@@ -327,7 +327,7 @@ class ResNetBottleneckBlock_v2_renorm(nn.Module):
             padding = 1
         )
 
-        self.batch_norm_3 = BatchNormalization2D(self.bottleneck_channels)
+        self.batch_norm_3 = BatchRenormalization2D(self.bottleneck_channels)
         self.relu_3 = nn.ReLU()
         self.conv_layer_3 = nn.Conv2d(
             in_channels = self.bottleneck_channels,

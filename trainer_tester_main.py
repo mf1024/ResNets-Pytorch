@@ -42,10 +42,11 @@ def plot_results(image_batch, predictions, truth, image_name = "plot"):
     plt.close()
 
 NUM_CLASSES = None
-NUM_CLASSES = 10
+NUM_CLASSES = 30
 
-data_path = "/Users/martinsf/ai/deep_learning_projects/data/imagenet_images"
-dataset_train, dataset_test = get_imagenet_datasets(data_path, num_classes = NUM_CLASSES)
+data_path = "/home/martin/ai/ImageNet-datasets-downloader/images_4/imagenet_images"
+dataset_train, dataset_test = get_imagenet_datasets(data_path, num_classes = NUM_CLASSES, random_seed = 422)
+print(dataset_train.get_class_names())
 
 if NUM_CLASSES == None:
     NUM_CLASSES = dataset_train.get_number_of_classes()
@@ -56,11 +57,11 @@ NUM_TEST_SAMPLES= dataset_test.get_number_of_samples()
 print(f"train_samples  {NUM_TRAIN_SAMPLES} test_samples {NUM_TEST_SAMPLES}")
 
 print(f'num_classes {NUM_CLASSES}')
-NUM_EPOCHS = 10000
-BATCH_SIZE = 8
+NUM_EPOCHS = 50
+BATCH_SIZE = 5
 LEARNING_RATE = 1e-4
-#DEVICE = 'cuda'
-DEVICE = 'cpu'
+DEVICE = 'cuda'
+# DEVICE = 'cpu'
 
 model_resnet = ResNet50_v2_renorm(class_num = NUM_CLASSES).to(DEVICE)
 
@@ -163,11 +164,11 @@ for epoch in range(NUM_EPOCHS):
 
             epoch_test_true_positives += torch.sum(y_prim.argmax(dim=1) == y)
 
-            if batch_idx == 0:
-                plot_results(x.detach().to('cpu').numpy(),
-                             y_prim.argmax(dim=1).detach().to('cpu').numpy(),
-                             y.detach().to('cpu').numpy(),
-                             image_name=f"epoch_{epoch}")
+            # if batch_idx == 0:
+            #     plot_results(x.detach().to('cpu').numpy(),
+            #                  y_prim.argmax(dim=1).detach().to('cpu').numpy(),
+            #                  y.detach().to('cpu').numpy(),
+            #                  image_name=f"epoch_{epoch}")
 
 
         epoch_test_accuracy = float(epoch_test_true_positives) / float(NUM_TEST_SAMPLES)

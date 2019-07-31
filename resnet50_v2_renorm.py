@@ -35,7 +35,7 @@ class ResNet50_v2_renorm(nn.Module):
         )
         self.conv1.add_module(
             'conv1_bn',
-            BatchNormalization2D(256)
+            BatchRenormalization2D(256)
         )
         self.conv1.add_module(
             'conv1_relu',

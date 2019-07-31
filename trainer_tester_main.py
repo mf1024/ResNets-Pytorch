@@ -13,6 +13,7 @@ from resnet50 import ResNet50
 from resnet50_v2 import ResNet50_v2
 from resnet101 import ResNet101
 from resnet152 import ResNet152
+from resnet50_v2_renorm import ResNet50_v2_renorm
 
 def plot_results(image_batch, predictions, truth, image_name = "plot"):
 
@@ -61,7 +62,7 @@ LEARNING_RATE = 1e-4
 #DEVICE = 'cuda'
 DEVICE = 'cpu'
 
-model_resnet = ResNet50_v2(class_num = NUM_CLASSES).to(DEVICE)
+model_resnet = ResNet50_v2_renorm(class_num = NUM_CLASSES).to(DEVICE)
 
 params = list(model_resnet.parameters())
 print(len(params))

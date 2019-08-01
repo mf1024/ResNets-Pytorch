@@ -58,8 +58,8 @@ print(f"train_samples  {NUM_TRAIN_SAMPLES} test_samples {NUM_TEST_SAMPLES}")
 
 print(f'num_classes {NUM_CLASSES}')
 NUM_EPOCHS = 50
-BATCH_SIZE = 5
-LEARNING_RATE = 1e-4
+BATCH_SIZE = 2
+LEARNING_RATE = 1e-5
 DEVICE = 'cuda'
 # DEVICE = 'cpu'
 
